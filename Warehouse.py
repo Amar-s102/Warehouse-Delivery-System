@@ -26,8 +26,14 @@ class Warehouse:
                 c = Cell((i, j))
                 self.grid[i].append(c)
 
+        self.delivery_points = set() 
+        self.delivered_boxes = []     
+
         print(self.grid[4][1].pos)
 
     def add_shelf(self, pos,shelf):
         self.grid[pos[0]][pos[1]].shelf = shelf
+
+    def add_delivery_point(self,pos):
+        self.delivery_points.add((pos[0],pos[1]))
 
