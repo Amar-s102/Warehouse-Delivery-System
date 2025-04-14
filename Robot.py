@@ -5,7 +5,7 @@ class Robot:
         self.x=x
         self.y=y
         self.rotation= 'R'
-        self.c=0
+        self.c=None
         self.move_cost=0
 
     def findTargetRotation(self, x1, y1, x2, y2):
@@ -19,11 +19,11 @@ class Robot:
             return 'S'
 
     def calculateRotationCost(self, current_rotation, target_rotation):
-        rotation_cost = 0
         rotations = ['N', 'E', 'S', 'W']
         current_index = rotations.index(current_rotation)
         target_index = rotations.index(target_rotation)
         rotation_cost = min(abs(current_index - target_index), 4 - abs(current_index - target_index))
+        return rotation_cost
 
     def heuristic(self, x1, y1, x2, y2, current_rotation):
         # Calculate Manhattan distance
@@ -43,35 +43,56 @@ class Robot:
     def find_path(self,warehouse,target_x,target_y):
         open_set=[]
         img_x, img_y= self.x, self.y
+        img_rotation = self.rotation
         img_cost = 0
         path = []
         while img_x != target_x or img_y != target_y:
             for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
                 new_x = img_x + dx
                 new_y = img_y + dy
+                new_rotation = self.findTargetRotation(img_x, img_y, new_x, new_y)
                 new_path = path.copy().append((new_x, new_y))
                 if self.valid_move(warehouse, new_x, new_y):
-                    target_rotation = self.findTargetRotation(img_x, img_y, new_x, new_y)
-                    actual_cost = img_cost + 1 + self.calculateRotationCost(self.rotation, target_rotation)
-                    cost = self.heuristic(new_x, new_y, target_x, target_y, self.rotation) + actual_cost
-                    open_set.append((cost, actual_cost, new_x, new_y, new_path))
+                    actual_cost = img_cost + 1 + self.calculateRotationCost(img_rotation, new_rotation)
+                    cost = self.heuristic(new_x, new_y, target_x, target_y, img_rotation) + actual_cost
+                    open_set.append((cost, actual_cost, new_x, new_y, new_rotation, new_path))
                     open_set.sort(key=lambda x: x[0]) 
 
             img_cost = open_set[0][1]
             img_x = open_set[0][2]
             img_y = open_set[0][3]
-            path = open_set[0][4]
+            img_rotation = open_set[0][4]
+            path = open_set[0][5]
         
         return path
 
             
-
+    def go_to_position(self, x, y, warehouse):
+        path = self.find_path(warehouse, x, y)
+        rotations = ['N', 'E', 'S', 'W']
+        for pos in path:
+            target_rotation = self.findTargetRotation(self.x, self.y, pos[0], pos[1])
+            current_index = rotations.index(self.rotation)
+            target_index = rotations.index(target_rotation)
+            rotation_degree = min(abs(current_index - target_index), 4 - abs(current_index - target_index))
+            if rotation_degree == 0:
+                self.move_forward(warehouse)
+            elif rotation_degree == 1:
+                self.rotate_right(warehouse)
+                self.move_forward(warehouse)
+            elif rotation_degree == -1:
+                self.rotate_left(warehouse)
+                self.move_forward(warehouse)
+            else:
+                self.move_backward(warehouse)
 
     def move_forward(self, warehouse):
-        if self.rotation=='N': self.y+1
-        elif self.rotation=='S':self.y-1
-        elif self.rotation=='E':self.x+1
-        elif self.rotation=='W':self.x-1
+        upd_x = self.x
+        upd_y = self.y
+        if self.rotation=='N': upd_y+=1
+        elif self.rotation=='S':upd_y-=1
+        elif self.rotation=='E':upd_x+=1
+        elif self.rotation=='W':upd_x-=1
         
         if self.valid_move(warehouse, upd_x, upd_y):
             self.x,self.y= upd_x,upd_y
@@ -80,10 +101,12 @@ class Robot:
         return False
 
     def move_backward(self,warehouse):
-        if self.rotation=='N': self.y-1
-        elif self.rotation=='S': self.y+1
-        elif self.rotation=='E': self.x-1
-        elif self.rotation=='W': self.x+1
+        upd_x = self.x
+        upd_y = self.y
+        if self.rotation=='N': upd_y-=1
+        elif self.rotation=='S': upd_y+=1
+        elif self.rotation=='E': upd_x-=1
+        elif self.rotation=='W': upd_x+=1
         
         if self.valid_move(warehouse, upd_x, upd_y):
             self.x,self.y= upd_x,upd_y

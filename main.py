@@ -44,7 +44,11 @@ class Button:
 # --- Setup ---
 robot = Robot(0, 0)
 warehouse = Warehouse(12, robot)
-
+warehouse.add_box(4, 5, Box("batat"))
+warehouse.add_box(7, 4, Box("batat"))
+warehouse.add_box(3, 6, Box("batat"))
+warehouse.add_box(4, 9, Box("batat"))
+warehouse.add_box(1, 2, Box("batat"))
 
 # --- Main Loop ---
 def main():

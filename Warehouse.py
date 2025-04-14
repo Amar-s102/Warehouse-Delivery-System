@@ -35,14 +35,10 @@ class Warehouse:
                 c = Cell(i, j)
                 self.grid[i].append(c)
 
-        self.delivery_points = set() 
-        self.delivered_boxes = []
 
     def add_box(self, x, y,box):
         self.grid[x][y].box = box
 
-    def add_delivery_point(self, x, y):
-        self.delivery_points.add((x,y))
 
     def draw(self, screen):
         for i in range(len(self.grid)):
@@ -54,16 +50,6 @@ class Warehouse:
                 if i == self.robot.x and j == self.robot.y:
                     pygame.draw.circle(screen, RED, (i*CELL_SIZE + CELL_SIZE/2, j*CELL_SIZE+ CELL_SIZE/2,), CELL_SIZE/3) # green border
 
-                if cell.shelf is not None:
-                    rect = pygame.Rect(i * CELL_SIZE + 10, j * CELL_SIZE + 10, CELL_SIZE - 20, CELL_SIZE - 20)
-                    pygame.draw.rect(screen, GRAY, rect)  # yellow box
-
-                # Highlight delivery points
-                if (i, j) in self.delivery_points:
-                    rect = pygame.Rect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-                    pygame.draw.rect(screen, GREEN, rect, 3)  # green border
-
-                # Highlight delivered boxes
-                if (i, j) in self.delivered_boxes:
+                if cell.box is not None:
                     rect = pygame.Rect(i * CELL_SIZE + 10, j * CELL_SIZE + 10, CELL_SIZE - 20, CELL_SIZE - 20)
                     pygame.draw.rect(screen, YELLOW, rect)  # yellow box
