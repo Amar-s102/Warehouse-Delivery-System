@@ -4,9 +4,11 @@ class Robot:
     def __init__(self, x,y):
         self.x=x
         self.y=y
-        self.rotation= 'R'
+        self.rotation= 'E'
         self.c=None
         self.move_cost=0
+        self.actions = []
+
 
     def findTargetRotation(self, x1, y1, x2, y2):
         if x1 < x2:
@@ -51,8 +53,9 @@ class Robot:
                 new_x = img_x + dx
                 new_y = img_y + dy
                 new_rotation = self.findTargetRotation(img_x, img_y, new_x, new_y)
-                new_path = path.copy().append((new_x, new_y))
-                if self.valid_move(warehouse, new_x, new_y):
+                if self.valid_move(warehouse, new_x, new_y) and not path.__contains__((new_x, new_y)):
+                    new_path = path.copy()
+                    new_path.append((new_x, new_y))
                     actual_cost = img_cost + 1 + self.calculateRotationCost(img_rotation, new_rotation)
                     cost = self.heuristic(new_x, new_y, target_x, target_y, img_rotation) + actual_cost
                     open_set.append((cost, actual_cost, new_x, new_y, new_rotation, new_path))
@@ -63,6 +66,7 @@ class Robot:
             img_y = open_set[0][3]
             img_rotation = open_set[0][4]
             path = open_set[0][5]
+            open_set.remove(open_set[0])
         
         return path
 
@@ -70,21 +74,41 @@ class Robot:
     def go_to_position(self, x, y, warehouse):
         path = self.find_path(warehouse, x, y)
         rotations = ['N', 'E', 'S', 'W']
+        self.actions = []
+        sim_robot = Robot(self.x, self.y)
+        sim_robot.rotation = self.rotation
         for pos in path:
-            target_rotation = self.findTargetRotation(self.x, self.y, pos[0], pos[1])
-            current_index = rotations.index(self.rotation)
+            target_rotation = self.findTargetRotation(sim_robot.x, sim_robot.y, pos[0], pos[1])
+            current_index = rotations.index(sim_robot.rotation)
             target_index = rotations.index(target_rotation)
-            rotation_degree = min(abs(current_index - target_index), 4 - abs(current_index - target_index))
+            rotation_degree = (target_index - current_index) % 4
             if rotation_degree == 0:
-                self.move_forward(warehouse)
+                sim_robot.move_forward(warehouse)
+                self.actions.append(0)
             elif rotation_degree == 1:
-                self.rotate_right(warehouse)
-                self.move_forward(warehouse)
-            elif rotation_degree == -1:
-                self.rotate_left(warehouse)
-                self.move_forward(warehouse)
+                sim_robot.rotate_right(warehouse)
+                sim_robot.move_forward(warehouse)
+                self.actions.append(1)
+                self.actions.append(0)
+            elif rotation_degree == 3:
+                sim_robot.rotate_left(warehouse)
+                sim_robot.move_forward(warehouse)
+                self.actions.append(2)
+                self.actions.append(0)
             else:
-                self.move_backward(warehouse)
+                sim_robot.move_backward(warehouse)
+                self.actions.append(3)
+
+    def update_movement(self, warehouse):
+        action = self.actions.pop(0)
+        if action == 0:
+            self.move_forward(warehouse)
+        elif action == 1:
+            self.rotate_right(warehouse)
+        elif action == 2:
+            self.rotate_left(warehouse)
+        else:
+            self.move_backward(warehouse)
 
     def move_forward(self, warehouse):
         upd_x = self.x
