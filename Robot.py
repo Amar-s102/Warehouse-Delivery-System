@@ -129,7 +129,17 @@ class Robot:
         if self.c:
             return False
         
-        target_cell=warehouse.grid[self.x][self.y]
+        front_x, front_y = self.x, self.y
+        if self.rotation == 'N':
+            front_y += 1
+        elif self.rotation == 'S':
+            front_y -= 1
+        elif self.rotation == 'E':
+            front_x += 1
+        elif self.rotation == 'W':
+            front_x -= 1
+
+        target_cell=warehouse.grid[front_x][front_y]
         if target_cell.box:
             self.c=target_cell.box
             target_cell.box=None
@@ -139,8 +149,19 @@ class Robot:
     def deliver_box(self,warehouse):
         if not self.c: return False
         
-        if (self.x , self.y) in warehouse.delivery_points:
-            warehouse.delivered_boxes.apped(self.c)
+        front_x, front_y = self.x, self.y
+        if self.rotation == 'N':
+            front_y += 1
+        elif self.rotation == 'S':
+            front_y -= 1
+        elif self.rotation == 'E':
+            front_x += 1
+        elif self.rotation == 'W':
+            front_x -= 1
+
+        target_cell=warehouse.grid[front_x][front_y]
+        if target_cell.box is None:
+            target_cell.box=self.c
             self.c=None
             return True
         return False
