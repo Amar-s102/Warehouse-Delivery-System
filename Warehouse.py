@@ -18,19 +18,11 @@ class Box:
         self.name = s
 
 
-class Shelf:
-    def __init__(self):
-        self.boxes = []
-
-    def add_box(self, box):
-        self.boxes.append(box)
-
-
 class Cell:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.shelf = None
+        self.box = None
 
 
 class Warehouse:
@@ -46,8 +38,8 @@ class Warehouse:
         self.delivery_points = set() 
         self.delivered_boxes = []
 
-    def add_shelf(self, x, y,shelf):
-        self.grid[x][y].shelf = shelf
+    def add_box(self, x, y,box):
+        self.grid[x][y].box = box
 
     def add_delivery_point(self, x, y):
         self.delivery_points.add((x,y))
