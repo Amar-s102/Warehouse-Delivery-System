@@ -2,7 +2,6 @@ import pygame
 from Warehouse import *
 from Robot import *
 
-# --- Constants ---
 WIDTH, HEIGHT = 600, 600
 CELL_SIZE = 50
 ROWS, COLUMNS = HEIGHT // CELL_SIZE, (WIDTH - 150) // CELL_SIZE
@@ -21,7 +20,6 @@ pygame.display.set_caption("Warehouse Delivery System")
 CLOCK = pygame.time.Clock()
 FPS = 30
 
-# --- Classes ---
 class Button:
     def __init__(self, x, y, width, height, text, color, text_color, action=None):
         self.rect = pygame.Rect(x, y, width, height)
@@ -41,7 +39,6 @@ class Button:
         return self.rect.collidepoint(pos)
 
 
-# --- Setup ---
 robot = Robot(0, 0)
 warehouse = Warehouse(12, robot)
 warehouse.add_box(1, 3, Box("batata"))
@@ -50,8 +47,6 @@ warehouse.add_box(3, 6, Box("batat2"))
 warehouse.add_box(4, 9, Box("batat3"))
 warehouse.add_box(1, 2, Box("batat4"))
 
-# robot.go_to_position(1, 1, warehouse)
-# --- Main Loop ---
 def main():
     running = True
     while running:

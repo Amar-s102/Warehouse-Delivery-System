@@ -1,5 +1,4 @@
 import math
-
 from Warehouse import *
 
 class Robot:
@@ -30,19 +29,15 @@ class Robot:
         return rotation_cost
 
     def heuristic(self, x1, y1, x2, y2, current_rotation, optional_rot = None):
-        # Calculate Manhattan distance
         distance_cost = abs(x1 - x2) + abs(y1 - y2)
 
-        # Determine the required direction to move toward the target
         target_rotation = self.findTargetRotation(x1, y1, x2, y2)
 
-        # Calculate rotation cost
         rotation_cost = self.calculateRotationCost(current_rotation, target_rotation)
 
         if optional_rot is not None:
             rotation_cost += self.calculateRotationCost(target_rotation, optional_rot)
 
-        # Return the total heuristic cost
         return distance_cost + rotation_cost
 
     
@@ -132,12 +127,12 @@ class Robot:
             print(target_rot)
 
             if rotation_diff == 1:
-                self.actions.append(1)  # Rotate right
+                self.actions.append(1)
             elif rotation_diff == 2:
                 self.actions.append(1)
-                self.actions.append(1)  # Rotate 180 (right twice)
+                self.actions.append(1)
             elif rotation_diff == 3:
-                self.actions.append(2)  # Rotate left
+                self.actions.append(2)
 
             if pickup:
                 self.actions.append(4)
