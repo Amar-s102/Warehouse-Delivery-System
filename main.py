@@ -50,7 +50,7 @@ warehouse.add_box(3, 6, Box("batat2"))
 warehouse.add_box(4, 9, Box("batat3"))
 warehouse.add_box(1, 2, Box("batat4"))
 
-robot.go_to_position(1, 1, warehouse)
+# robot.go_to_position(1, 1, warehouse)
 # --- Main Loop ---
 def main():
     running = True
@@ -70,7 +70,12 @@ def main():
                 mx, my = pygame.mouse.get_pos()
                 x, y = mx // CELL_SIZE, my // CELL_SIZE
                 if pygame.mouse.get_pressed()[0] and len(robot.actions) == 0:
-                    robot.go_to_position(x, y, warehouse)
+                    if warehouse.grid[x][y].box is not None and robot.c is None:
+                        robot.go_to_box(x, y,warehouse, True)
+                    elif warehouse.grid[x][y].box is None and robot.c is not None:
+                        robot.go_to_box(x, y, warehouse, False)
+                    elif warehouse.grid[x][y].box is None:
+                        robot.go_to_position(x, y, warehouse)
                 elif pygame.mouse.get_pressed()[2]:
                     warehouse.add_box(x, y, Box("batata"))
             elif event.type == pygame.KEYDOWN:
@@ -82,6 +87,8 @@ def main():
                     robot.move_backward(warehouse)
                 if event.key == pygame.K_a:
                     robot.rotate_left(warehouse)
+                if event.key == pygame.K_p:
+                    robot.pickup_box(warehouse)
 
 
 

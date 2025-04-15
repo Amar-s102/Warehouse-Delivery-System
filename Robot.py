@@ -1,3 +1,5 @@
+import math
+
 from Warehouse import *
 
 class Robot:
@@ -27,7 +29,7 @@ class Robot:
         rotation_cost = min(abs(current_index - target_index), 4 - abs(current_index - target_index))
         return rotation_cost
 
-    def heuristic(self, x1, y1, x2, y2, current_rotation):
+    def heuristic(self, x1, y1, x2, y2, current_rotation, optional_rot = None):
         # Calculate Manhattan distance
         distance_cost = abs(x1 - x2) + abs(y1 - y2)
 
@@ -36,6 +38,9 @@ class Robot:
 
         # Calculate rotation cost
         rotation_cost = self.calculateRotationCost(current_rotation, target_rotation)
+
+        if optional_rot is not None:
+            rotation_cost += self.calculateRotationCost(target_rotation, optional_rot)
 
         # Return the total heuristic cost
         return distance_cost + rotation_cost
@@ -99,6 +104,46 @@ class Robot:
                 sim_robot.move_backward(warehouse)
                 self.actions.append(3)
 
+        return sim_robot.rotation
+
+    def go_to_box(self, x, y,warehouse, pickup):
+        minimum_cost = math.inf
+        best_cell = None
+        target_rot = None
+        rotation_dict = {(0, 1) : 'S', (1, 0) : 'W', (0, -1): 'N', (-1, 0) : 'E'}
+        for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+            new_x = x + dx
+            new_y = y + dy
+            if self.valid_move(warehouse, new_x, new_y):
+                new_cost = self.heuristic(self.x, self.y, new_x, new_y, self.rotation, rotation_dict[(dx, dy)])
+                if new_cost < minimum_cost:
+                    minimum_cost = new_cost
+                    best_cell = warehouse.grid[new_x][new_y]
+                    target_rot = rotation_dict[(dx, dy)]
+
+        if best_cell is not None:
+            current_rotation = self.go_to_position(best_cell.x, best_cell.y, warehouse)
+
+            rotations = ['N', 'E', 'S', 'W']
+            current_index = rotations.index(current_rotation)
+            target_index = rotations.index(target_rot)
+            rotation_diff = (target_index - current_index) % 4
+
+            print(target_rot)
+
+            if rotation_diff == 1:
+                self.actions.append(1)  # Rotate right
+            elif rotation_diff == 2:
+                self.actions.append(1)
+                self.actions.append(1)  # Rotate 180 (right twice)
+            elif rotation_diff == 3:
+                self.actions.append(2)  # Rotate left
+
+            if pickup:
+                self.actions.append(4)
+            else:
+                self.actions.append(5)
+
     def update_movement(self, warehouse):
         action = self.actions.pop(0)
         if action == 0:
@@ -107,8 +152,12 @@ class Robot:
             self.rotate_right(warehouse)
         elif action == 2:
             self.rotate_left(warehouse)
-        else:
+        elif action == 3:
             self.move_backward(warehouse)
+        elif action == 4:
+            self.pickup_box(warehouse)
+        elif action == 5:
+            self.deliver_box(warehouse)
 
     def move_forward(self, warehouse):
         upd_x = self.x
